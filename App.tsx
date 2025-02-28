@@ -1,38 +1,36 @@
-import { StatusBar } from 'expo-status-bar';
-import {StyleSheet, View} from 'react-native';
-import {useState} from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {NoteTakingInput} from "./components/NoteTakingInput";
-import {HomeScreen} from "./components/HomeScreen";
+import {StatusBar} from 'expo-status-bar';
+import {HomeScreen} from "./screens/HomeScreen";
+import {NavigationContainer} from "@react-navigation/native";
+import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {EditNoteScreen} from "./screens/EditNoteScreen";
+import {RootStackParamList} from "./types";
+import React from "react";
+import {NewNoteButton} from "./components/NewNoteButton";
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
 
-  const [shouldCreateNewNote, setShouldCreateNewNote] = useState<boolean>(false);
+    const renderNewNoteButton = () => {
+        return <NewNoteButton />;
+    }
 
-  const saveNote = async (text: string) => {
-    await AsyncStorage.setItem('note', text);
-    setShouldCreateNewNote(false);
-  };
-
-  return (
-    <View style={styles.container}>
-      <StatusBar style="auto" />
-      {
-        shouldCreateNewNote ? (
-          <NoteTakingInput saveNote={saveNote} />
-        ) : (
-          <HomeScreen toggleNewNote={setShouldCreateNewNote} />
-        )
-      }
-    </View>
-  );
+    return (
+        <NavigationContainer>
+            <StatusBar style="auto"/>
+            <Stack.Navigator>
+                <Stack.Screen
+                    name="Home"
+                    component={HomeScreen}
+                    options={() => {
+                        return {
+                            headerTitle: 'All Notes',
+                            headerRight: () => renderNewNoteButton()
+                        }
+                    }}
+                />
+                <Stack.Screen name="EditNote" component={EditNoteScreen} />
+            </Stack.Navigator>
+        </NavigationContainer>
+    );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  }
-});
